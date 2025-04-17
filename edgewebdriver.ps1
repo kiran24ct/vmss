@@ -68,3 +68,11 @@ if ($allowEdge -and $allowEdge.Enabled -eq "True") {
 } else {
     Write-Warning "Allow rule for EdgeDriver not found or not enabled."
 }
+
+
+
+------------------------
+
+Install-Binary `
+    -Url 'https://msedge.sf.dl.delivery.mp.microsoft.com/filestreamingservice/files/f73bb7cb-5f6f-4fd4-9b8d-efaa14420f12/MicrosoftEdgeEnterpriseX64.msi' `
+    -ExpectedSignature 'F27BA8D7BFADEB751348E4D238391D5F6D2F1D6E'
