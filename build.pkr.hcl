@@ -180,6 +180,24 @@ build {
     inline = ["Set-Service -Name wlansvc -StartupType Manual", "if ((Get-Service -Name wlansvc).Status -eq 'Running') { Stop-Service -Name wlansvc }"]
   }
 
+#######################################################################################
+#
+#Centralized Artifactory Authenatication Logic
+#======================================================================================#
+# This step ensures that all subsequent installations packages or binares from
+# Artifactory are authenticated using a centralized managment logic.
+# The credentails are injected through Azure Devops at runtime.
+#
+#######################################################################################
+provisioner "powershell" {
+  inline = [
+    "[Environment]::SetEnvironmentVariable('ARTIFACTORY_USER', '${var.artifactoryUsername}', 'Machine')",
+    "[Environment]::SetEnvironmentVariable('ARTIFACTORY_API_KEY', '${var.artifactoryPassword}', 'Machine')",
+    "$nugetConfigPath = \"$env:ProgramData\\NuGet\\NuGet.Config\"",
+    "New-Item -ItemType Directory -Path (Split-Path $nugetConfigPath) -Force | Out-Null",
+    "Set-Content -Path $nugetConfigPath -Value @\"\n<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<configuration>\n  <packageSources>\n    <add key=\"Artifactory\" value=\"https://prod.artifactory.nfcu.net/artifactory/api/nuget/v3/nuget/index.json\" />\n  </packageSources>\n  <packageSourceCredentials>\n    <Artifactory>\n      <add key=\"Username\" value=\"${var.artifactoryUsername}\" />\n      <add key=\"ClearTextPassword\" value=\"${var.artifactoryPassword}\" />\n    </Artifactory>\n  </packageSourceCredentials>\n</configuration>\n\"@"
+  ]
+}
   #######################################################################################
   #
   # Install Software and Tools
